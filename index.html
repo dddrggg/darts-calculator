@@ -13,6 +13,7 @@
       --text:#fff;
       --muted:#a9a9a9;
       --blue:#2f80ff;
+      --blue-soft:rgba(47,128,255,.12);
       --green:#2ecc71;
       --orange:#f39c12;
       --red:#ff4d4f;
@@ -34,6 +35,7 @@
       font-size:22px;
       font-weight:700;
       margin:8px 0 14px;
+      letter-spacing:.2px;
     }
     .card{
       background:var(--panel);
@@ -51,7 +53,7 @@
       background:var(--panel2);
       border-radius:12px;
       padding:12px;
-      min-height:72px;
+      min-height:78px;
     }
     .label{
       color:var(--muted);
@@ -62,17 +64,15 @@
       font-size:22px;
       font-weight:700;
       line-height:1.1;
+      word-break:break-word;
     }
     .value.small{
       font-size:18px;
     }
-    .blue{
-      color:#8ec1ff;
-    }
     .sub{
       color:var(--muted);
       font-size:12px;
-      line-height:1.35;
+      line-height:1.4;
       margin-top:8px;
     }
     .leg{
@@ -109,7 +109,7 @@
       gap:10px;
     }
     .maxbox{
-      background:rgba(47,128,255,.12);
+      background:var(--blue-soft);
       border:1px solid rgba(47,128,255,.35);
       border-radius:12px;
       padding:12px;
@@ -165,15 +165,15 @@
         </div>
       </div>
       <div class="sub">
-        This version mirrors your spreadsheet logic: pick the game type for each leg, key the score for each leg, and it shows the <span class="blue">max score</span> for the next legs from the remaining bust budget.
+        Pick the game type for each leg, key your score, and the blue boxes show the max score for the next legs from the remaining bust budget.
       </div>
     </div>
 
     <div class="card">
       <div class="row3">
         <div class="mini">
-          <div class="label">Bust Rule</div>
-          <div id="bustRule" class="value">0.26</div>
+          <div class="label">Bust Rule (editable)</div>
+          <input id="bustRuleInput" type="number" step="0.01" value="0.26" oninput="recalc()" />
         </div>
         <div class="mini">
           <div class="label">Max Bust Budget</div>
@@ -286,14 +286,12 @@
         01 uses a conversion of <b>5.00</b> points per bust unit.<br>
         Cricket uses a conversion of <b>0.20</b> MPR per bust unit.<br><br>
         Bust used = <b>(entered score - base average) / conversion</b>.<br>
-        Max leg score = <b>base average + remaining bust × conversion</b>.<br><br>
-        Negative bust is treated as 0, so scoring below your base does not give you extra budget.
+        Max leg score = <b>base average + remaining bust × conversion</b>.
       </div>
     </div>
   </div>
 
   <script>
-    const bustRule = 0.26;
     const x01Conversion = 5.0;
     const crConversion = 0.2;
 
@@ -313,6 +311,10 @@
       return Number(document.getElementById("avgCRInput").value) || 0;
     }
 
+    function getBustRule(){
+      return Number(document.getElementById("bustRuleInput").value) || 0;
+    }
+
     function getBase(mode){
       return mode === "CR" ? getBaseCR() : getBase01();
     }
@@ -322,7 +324,7 @@
     }
 
     function getMaxBustBudget(){
-      return bustRule * 60;
+      return getBustRule() * 60;
     }
 
     function parseScore(id){
@@ -352,6 +354,7 @@
     }
 
     function recalc(){
+      const _rt = getRT();
       const maxBudget = getMaxBustBudget();
 
       const mode1 = document.getElementById("mode1").value;
@@ -375,7 +378,6 @@
       const used3 = calcBustUsed(score3, mode3);
       const remaining3 = Math.max(0, remaining2 - used3);
 
-      document.getElementById("bustRule").textContent = round2(bustRule);
       document.getElementById("maxBudget").textContent = round2(maxBudget);
       document.getElementById("remainingOverall").textContent = round2(remaining3);
 
@@ -408,6 +410,7 @@
       document.getElementById("rtInput").value = "8.06";
       document.getElementById("avg01Input").value = "68.96";
       document.getElementById("avgCRInput").value = "2.57";
+      document.getElementById("bustRuleInput").value = "0.26";
 
       document.getElementById("mode1").value = "01";
       document.getElementById("mode2").value = "CR";
@@ -423,5 +426,4 @@
     recalc();
   </script>
 </body>
-
 </html>
